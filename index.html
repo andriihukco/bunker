@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Glitchy Text with Background Audio Control</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pixelify+Sans&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      /* Custom variables */
+      :root {
+        --main-color: #000;
+        --font-color: #ff402b;
+      }
+
+      body {
+        background-color: var(--main-color);
+        font-family: "Pixelify Sans", sans-serif;
+      }
+
+      .glitch {
+        color: var(--font-color);
+        position: relative;
+      }
+
+      .glitch::before,
+      .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        color: var(--font-color);
+        background: var(--main-color);
+        overflow: hidden;
+        animation: noise-anim 9s infinite linear alternate-reverse;
+      }
+
+      .glitch::before {
+        left: -2px;
+        text-shadow: 1px 0 blue;
+        animation: noise-anim-2 10s infinite linear alternate-reverse;
+      }
+
+      .glitch::after {
+        left: 3px;
+        text-shadow: -1px 0 red;
+      }
+
+      @keyframes noise-anim {
+        0% {
+          clip: rect(1px, 9999px, 55px, 0);
+        }
+        25% {
+          clip: rect(44px, 9999px, 30px, 0);
+        }
+        50% {
+          clip: rect(12px, 9999px, 85px, 0);
+        }
+        75% {
+          clip: rect(42px, 9999px, 15px, 0);
+        }
+        100% {
+          clip: rect(72px, 9999px, 95px, 0);
+        }
+      }
+
+      @keyframes noise-anim-2 {
+        0% {
+          clip: rect(25px, 9999px, 60px, 0);
+        }
+        25% {
+          clip: rect(30px, 9999px, 85px, 0);
+        }
+        50% {
+          clip: rect(5px, 9999px, 40px, 0);
+        }
+        75% {
+          clip: rect(60px, 9999px, 10px, 0);
+        }
+        100% {
+          clip: rect(10px, 9999px, 70px, 0);
+        }
+      }
+    </style>
+  </head>
+  <body class="flex items-center justify-center h-screen text-white">
+    <!-- Background Audio -->
+    <audio id="background-audio" src="bg-audio.mp3" autoplay loop></audio>
+
+    <!-- Audio Control Button -->
+    <button
+      id="audio-control"
+      class="absolute top-4 right-4 p-2 text-white bg-gray-800 rounded-full"
+    >
+      <!-- "Turn Off" Icon -->
+      <svg
+        id="sound-on"
+        class="w-6 h-6 hidden"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M11 2h2v20h-2v-2H9v-2h2V6H9V4h2V2zM7 8V6h2v2H7zm0 8H3V8h4v2H5v4h2v2zm0 0v2h2v-2H7zm10-6h-2v4h2v-4zm2-2h2v8h-2V8zm0 8v2h-4v-2h4zm0-10v2h-4V6h4z"
+          fill="currentColor"
+        />
+      </svg>
+      <!-- "Turn On" Icon -->
+      <svg
+        id="sound-off"
+        class="w-6 h-6"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M13 2h-2v2H9v2H7v2H3v8h4v2h2v2h2v2h2V2zM9 18v-2H7v-2H5v-4h2V8h2V6h2v12H9zm10-6.777h-2v-2h-2v2h2v2h-2v2h2v-2h2v2h2v-2h-2v-2zm0 0h2v-2h-2v2z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+
+    <!-- Content -->
+    <section id="home" class="text-center">
+      <h1 class="glitch text-8xl font-bold" data-text="Bunker 1.0">
+        Bunker 1.0
+      </h1>
+      <p class="text-4xl font-medium text-white mt-5"">
+        Придумано з U:DO
+      </p>
+    </section>
+
+    <!-- JavaScript to Toggle Sound -->
+    <script>
+      const audio = document.getElementById("background-audio");
+      const audioControl = document.getElementById("audio-control");
+      const soundOnIcon = document.getElementById("sound-on");
+      const soundOffIcon = document.getElementById("sound-off");
+
+      audioControl.addEventListener("click", () => {
+        if (audio.paused) {
+          audio.play();
+          soundOnIcon.classList.remove("hidden");
+          soundOffIcon.classList.add("hidden");
+        } else {
+          audio.pause();
+          soundOnIcon.classList.add("hidden");
+          soundOffIcon.classList.remove("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>
