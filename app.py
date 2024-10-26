@@ -2,10 +2,53 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackContext, CallbackQueryHandler
 import random
 from typing import Dict, List, Any
+import asyncio
+from telegram.error import TimedOut
+from functools import wraps
+
+# Retry decorator to handle timeout errors
+def retry_on_timeout(retries=3, delay=2):
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            for attempt in range(retries):
+                try:
+                    return await func(*args, **kwargs)
+                except TimedOut:
+                    if attempt < retries - 1:
+                        await asyncio.sleep(delay)
+                        print(f"Retrying due to timeout... (Attempt {attempt + 1})")
+                    else:
+                        print("All retry attempts failed due to timeout.")
+                        raise
+        return wrapper
+    return decorator
+
+@retry_on_timeout()
+async def send_safe_message(context, chat_id, text, reply_markup=None):
+    """Safe message sending with retry handling."""
+    await context.bot.send_message(chat_id=chat_id, text=text, reply_markup=reply_markup)
+
 
 # Game Configuration
-PROFESSIONS = ["Інженер", "Лікар", "Науковець", "Вчитель", "Митець"]
-ITEMS = ["Радіо", "Набір інструментів", "Ноутбук", "Книга", "Мапа"]
+PROFESSIONS = ["Інженер", "Лікар", "Науковець", "Вчитель", "Митець",
+               "Солдат", "Пілот", "Фермер", "Кухар", "Механік",
+               "Журналіст", "Бізнесмен", "Архітектор", "Спортсмен", "Еколог",
+               "Адвокат", "Психолог", "Програміст", "Менеджер", "Соціолог",
+               "Рятувальник", "Астроном", "Історик", "Перекладач", "Геолог",
+               "Біолог", "Хімік", "Фізик", "Інструктор з виживання", "Електрик",
+               "Оператор дронів", "Аналітик", "Дизайнер", "Спеціаліст з комунікацій", "Картограф"]
+
+ITEMS = ["Радіо", "Набір інструментів", "Ноутбук", "Книга", "Мапа",
+         "Ліхтарик", "Канат", "Компас", "Запальничка", "Намет",
+         "Повербанк", "Камера", "Повідомлення про виживання", "Водонепроникний плащ",
+         "Сокира", "Малий газовий плитка", "Спалаханка", "Спальний мішок", "Набір продуктів",
+         "Великий контейнер для зберігання", "Блокнот і ручка", "Набір для шиття", "Ручний генератор",
+         "Зарядний пристрій для батарейок", "Пластикові контейнери", "Швейцарський ніж", "Ручна пилка",
+         "Розкладний стілець", "Кружка з фільтром для води", "Додаткові батарейки", 
+         "Інфрачервоний прилад нічного бачення", "Портативна сонячна панель", "Таблетки для очищення води",
+         "Протигаз", "Захисні окуляри", "Інструмент для відкривання банок", "Кухонний термометр"]
+
 BOT_NAMES = [
     "R2-D2",
     "C-3PO",
@@ -37,7 +80,7 @@ class GameState:
         self.players = {}
         self.started = False
         self.initiator = initiator
-        self.discussion_time = 60  # Default time in seconds
+        self.discussion_time = 30  # Default time in seconds
         self.round = 0
 
     def add_player(self, user_id: int, name: str) -> Dict[str, str]:
